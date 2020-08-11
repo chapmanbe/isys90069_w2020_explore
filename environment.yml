@@ -1,0 +1,18 @@
+name: isys90069_w2020_explore
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - spacy=2.2.2
+  - numpy
+  - pandas
+  - pip
+  - matplotlib
+  - spacy
+  - pip:
+    - pymysql
+    - cycontext
+    - ibis-framework[mysql]
+    - clinical-sectionizer==0.1.2
+    - medspacy==0.0.1
+    - RISE
