@@ -19,26 +19,14 @@ print("loading i2b2 language model")
 
 nlp = medspacy.load("en_info_3700_i2b2_2012", disable=["tagger", "parser", "ner"])
 
-class MyCorpus(object):
-    """An interator that yields sentences (lists of str)."""
+cursor.execute("""SELECT text FROM noteevents LIMIT 100""")
+r = cursor.fetchall()
+docs = nlp.pipe(r)
+sents = [utils.simple_preprocess(line.string) for line in doc.sents for doc in docs]
 
-    def __iter__(self):
-        cursor.execute("""SELECT text FROM noteevents""")
-        while True:
-            r = cursor.fetchone()
-            if not r:
-                return
-            r = r[0]
-            
-            for line in nlp(r).sents:
-                # assume there's one document per line, tokens separated by whitespace
-                yield utils.simple_preprocess(line.string)
-
-print('creating iterator')
-mimic = MyCorpus()
 
 print('training model')
-model = gensim.models.Word2Vec(sentences=mimic, min_count=20, size=1000, workers=32)
+model = gensim.models.Word2Vec(sentences=sents, min_count=20, size=1000, workers=32)
 print('saving model')
-model.save("mimic2wv.gz")
+model.save("mimic2wv_b.gz")
 
