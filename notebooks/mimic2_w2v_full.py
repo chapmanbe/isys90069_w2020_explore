@@ -1,5 +1,6 @@
 import pymysql
 import medspacy
+import spacy
 from gensim import utils
 import gensim.models
 import sys
@@ -17,19 +18,18 @@ cursor = conn.cursor()
 
 print("loading i2b2 language model")
 
-nlp = medspacy.load("en_info_3700_i2b2_2012", disable=["tagger", "parser", "ner"])
+nlp = medspacy.load("en_info_3700_i2b2_2012", enable=["sentencizer"])#=["tagger", "parser", "ner"])
+print(nlp.pipeline)
 
-cursor.execute("""SELECT text FROM noteevents LIMIT 100""")
+cursor.execute("""SELECT text FROM noteevents LIMIT""")
 r = [r[0] for r in cursor.fetchall()]
-docs = nlp.pipe(r, n_process=16, batch_size=64)
+docs = nlp.pipe(r, n_process=6, batch_size=64)
 print("processed tokenization")
 sents = [[line.string for line in doc.sents] for _,doc in enumerate(docs)]
-print(sents)
-sys.exit(0)
 
 
 print('training model')
-model = gensim.models.Word2Vec(sentences=sents, min_count=20, size=1000, workers=32)
+model = gensim.models.Word2Vec(sentences=sents, min_count=20, size=1000, workers=6)
 print('saving model')
 model.save("mimic2wv_b.gz")
 
