@@ -20,9 +20,12 @@ print("loading i2b2 language model")
 nlp = medspacy.load("en_info_3700_i2b2_2012", disable=["tagger", "parser", "ner"])
 
 cursor.execute("""SELECT text FROM noteevents LIMIT 100""")
-r = cursor.fetchall()
-docs = nlp.pipe(r)
-sents = [utils.simple_preprocess(line.string) for line in doc.sents for doc in docs]
+r = [r[0] for r in cursor.fetchall()]
+docs = nlp.pipe(r, n_process=16, batch_size=64)
+print("processed tokenization")
+sents = [[line.string for line in doc.sents] for _,doc in enumerate(docs)]
+print(sents)
+sys.exit(0)
 
 
 print('training model')
